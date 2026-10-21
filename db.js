@@ -167,8 +167,8 @@ for (const [k, v] of Object.entries(settingsDefaults)) insertSetting.run(k, v);
 // ---- Seed admin ----
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@chotroi.vn';
 const existingAdmin = db.prepare('SELECT id FROM users WHERE email = ?').get(adminEmail);
-if (!existingAdmin) {
-  const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'changeme', 10);
+if (!existingAdmin && process.env.ADMIN_PASSWORD) {
+  const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10);
   db.prepare('INSERT INTO users (email, password_hash, name, is_admin) VALUES (?, ?, ?, 1)')
     .run(adminEmail, hash, 'Quản trị viên');
   console.log('Seeded admin account:', adminEmail);

@@ -1,4 +1,5 @@
 require('dotenv').config();
+if (!process.env.SESSION_SECRET) throw new Error('Thiếu SESSION_SECRET trong .env');
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
@@ -23,7 +24,7 @@ app.use('/media', express.static(MEDIA_DIR, { maxAge: '7d' }));
 
 app.use(session({
   store: new SQLiteStore({ db: 'sessions.db', dir: path.join(__dirname, 'data') }),
-  secret: process.env.SESSION_SECRET || 'chotroi_secret',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 24 * 14 }, // 14 days

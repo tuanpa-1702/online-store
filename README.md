@@ -13,8 +13,8 @@ pm2 save                             # lưu danh sách process
 
 ## Tài khoản quản trị mặc định
 - URL: `/admin`
-- Email: `it@nagase.com.vn`
-- Mật khẩu: `(đặt trong .env, tối thiểu 12 ký tự)`  (đổi trong file `.env` -> `ADMIN_PASSWORD` trước lần chạy đầu, hoặc đổi sau trong DB)
+- Email: `admin@your-domain.com`
+- Mật khẩu: `(đặt trong .env → ADMIN_PASSWORD)`  (đổi trong file `.env` -> `ADMIN_PASSWORD` trước lần chạy đầu, hoặc đổi sau trong DB)
 
 ## Tính năng
 - Trang chủ: danh sách sản phẩm, lọc theo danh mục, tìm kiếm, sắp xếp.
