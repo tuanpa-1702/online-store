@@ -1,0 +1,12 @@
+<%
+  const pm = { cod: 'COD (trả khi nhận)', bank: 'Chuyển khoản' };
+  const ps = {
+    unpaid:   ['Chưa thanh toán', 'bg-amber-50 text-amber-700'],
+    reported: ['Khách báo đã CK', 'bg-blue-50 text-blue-700'],
+    paid:     ['Đã thanh toán', 'bg-emerald-50 text-emerald-700'],
+  };
+  const st = ps[order.payment_status] || ps.unpaid;
+%>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold <%= order.payment_method === 'cod' ? 'bg-surface-container-high text-secondary' : st[1] %>">
+  <%= pm[order.payment_method] || 'COD' %><% if (order.payment_method === 'bank') { %> · <%= st[0] %><% } %>
+</span>

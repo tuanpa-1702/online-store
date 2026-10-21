@@ -1,0 +1,56 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="flex-grow max-w-[1360px] mx-auto px-5 md:px-8 py-8 w-full">
+  <h1 class="font-display text-2xl font-semibold text-on-surface mb-6">Giỏ hàng</h1>
+  <% if (cart.items.length === 0) { %>
+    <div class="bg-surface-container-lowest rounded-2xl p-16 text-center border border-surface-container-high">
+      <span class="material-symbols-outlined text-[64px] text-outline-variant">shopping_bag</span>
+      <p class="text-secondary mt-4">Giỏ hàng của bạn đang trống.</p>
+      <a href="/" class="inline-block mt-6 px-6 py-3 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container transition">Tiếp tục mua sắm</a>
+    </div>
+  <% } else { %>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div class="lg:col-span-8 flex flex-col gap-4">
+        <% cart.items.forEach(it => { %>
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-surface-container-high shadow-sm flex items-center gap-4">
+          <a href="/product/<%= it.slug %>" class="w-20 h-20 rounded-xl overflow-hidden bg-surface-container-low shrink-0">
+            <img src="<%= it.image %>" class="w-full h-full object-cover">
+          </a>
+          <div class="flex-1 min-w-0">
+            <a href="/product/<%= it.slug %>" class="font-semibold text-on-surface hover:text-primary line-clamp-1"><%= it.name %></a>
+            <p class="text-xs text-secondary"><%= it.category %></p>
+            <p class="text-primary font-bold mt-1"><%= fmt(it.price) %></p>
+          </div>
+          <form action="/cart/update" method="post" class="flex items-center border border-surface-container-high rounded-lg overflow-hidden">
+            <input type="hidden" name="productId" value="<%= it.id %>">
+            <button name="qty" value="<%= it.qty-1 %>" class="w-8 h-9 flex items-center justify-center hover:bg-surface-container"><span class="material-symbols-outlined text-[16px]">remove</span></button>
+            <span class="w-10 text-center text-sm font-semibold"><%= it.qty %></span>
+            <button name="qty" value="<%= it.qty+1 %>" class="w-8 h-9 flex items-center justify-center hover:bg-surface-container"><span class="material-symbols-outlined text-[16px]">add</span></button>
+          </form>
+          <div class="text-right w-28 shrink-0 hidden sm:block">
+            <p class="font-bold text-on-surface"><%= fmt(it.lineTotal) %></p>
+          </div>
+          <form action="/cart/remove" method="post">
+            <input type="hidden" name="productId" value="<%= it.id %>">
+            <button class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-primary hover:bg-surface-container"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+          </form>
+        </div>
+        <% }) %>
+      </div>
+
+      <div class="lg:col-span-4 bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm sticky top-24">
+        <h2 class="font-bold text-on-surface mb-4">Tóm tắt đơn hàng</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-secondary">Tạm tính</span><span class="font-semibold"><%= fmt(cart.subtotal) %></span></div>
+          <div class="flex justify-between"><span class="text-secondary">Phí vận chuyển</span><span class="font-semibold"><%= shipping === 0 ? 'Miễn phí' : fmt(shipping) %></span></div>
+          <div class="border-t border-surface-container-high pt-3 flex justify-between items-center">
+            <span class="font-bold">Tổng cộng</span><span class="text-xl font-extrabold text-primary"><%= fmt(total) %></span>
+          </div>
+        </div>
+        <a href="/checkout" class="block text-center mt-6 py-3.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container transition">Tiến hành thanh toán</a>
+        <a href="/" class="block text-center mt-2 py-2.5 text-sm text-secondary hover:text-on-surface">Tiếp tục mua sắm</a>
+      </div>
+    </div>
+  <% } %>
+</main>
+<%- include('partials/footer') %>

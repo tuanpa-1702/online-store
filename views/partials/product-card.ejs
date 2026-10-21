@@ -1,0 +1,35 @@
+<div class="flex flex-col bg-surface-container-lowest rounded-2xl p-3 shadow-sm hover:shadow-md transition-all duration-300 group">
+  <a href="/product/<%= p.slug %>" class="relative w-full aspect-square rounded-xl overflow-hidden bg-surface-container-low mb-3 block">
+    <img src="<%= p.image %>" alt="<%= p.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+    <% if (p.badge) { %>
+    <span class="absolute top-2.5 left-2.5 bg-surface/90 backdrop-blur text-on-surface text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm"><%= p.badge %></span>
+    <% } %>
+  </a>
+  <div class="flex flex-col flex-1 justify-between">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center justify-between text-secondary text-[11px]">
+        <span class="truncate"><%= p.category %></span>
+        <div class="flex items-center text-primary shrink-0">
+          <span class="material-symbols-outlined text-[15px]" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="ml-0.5 text-on-surface font-semibold"><%= p.rating %></span>
+          <span class="text-secondary ml-1">(<%= p.reviews %>)</span>
+        </div>
+      </div>
+      <a href="/product/<%= p.slug %>"><h3 class="font-display text-base font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-1"><%= p.name %></h3></a>
+      <p class="text-[13px] text-secondary line-clamp-2 leading-snug"><%= p.description %></p>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2.5 pt-3 mt-2">
+      <div class="min-w-0">
+        <% if (p.old_price) { %><span class="text-[11px] text-secondary line-through block"><%= fmt(p.old_price) %></span><% } %>
+        <span class="text-lg text-primary font-bold whitespace-nowrap"><%= fmt(p.price) %></span>
+      </div>
+      <form action="/cart/add" method="post" class="shrink-0">
+        <input type="hidden" name="productId" value="<%= p.id %>">
+        <input type="hidden" name="redirect" value="<%= currentPath %>">
+        <button type="submit" class="w-full sm:w-auto justify-center px-3 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1 shadow-sm">
+          <span class="material-symbols-outlined text-[16px]">add_shopping_cart</span> Thêm
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

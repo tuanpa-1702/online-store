@@ -1,0 +1,210 @@
+<%- include('../partials/admin-layout-top') %>
+<a href="/admin/products" class="text-sm text-secondary hover:text-on-surface flex items-center gap-1 mb-4"><span class="material-symbols-outlined text-[18px]">arrow_back</span> Quay lại danh sách</a>
+<form action="<%= action %>" method="post" enctype="multipart/form-data" class="max-w-3xl bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-5">
+  <div>
+    <label class="text-xs font-semibold text-secondary">Tên sản phẩm *</label>
+    <input name="name" required value="<%= product.name || '' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="text-xs font-semibold text-secondary">Danh mục</label>
+      <input name="category" value="<%= product.category || '' %>" list="catlist" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+      <datalist id="catlist">
+        <option value="Thiết bị âm thanh"><option value="Bàn phím & Chuột làm việc"><option value="Ánh sáng bảo vệ mắt"><option value="Nguồn & Trạm sạc đa năng"><option value="Phụ kiện bàn làm việc">
+      </datalist>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-secondary">Nhãn (badge)</label>
+      <input name="badge" value="<%= product.badge || '' %>" placeholder="VD: MỚI RA MẮT" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+    </div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div>
+      <label class="text-xs font-semibold text-secondary">Giá bán (₫) *</label>
+      <input name="price" type="number" required value="<%= product.price || '' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-secondary">Giá gốc (₫)</label>
+      <input name="old_price" type="number" value="<%= product.old_price || '' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-secondary">Tồn kho</label>
+      <input name="stock" type="number" value="<%= product.stock != null ? product.stock : 100 %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+    </div>
+  </div>
+  <div>
+    <label class="text-xs font-semibold text-secondary">Tags (phân cách bằng dấu phẩy)</label>
+    <input name="tags" value="<%= product.tags || '' %>" placeholder="Pin 55h, LDAC" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+  </div>
+  <div>
+    <label class="text-xs font-semibold text-secondary">Mô tả ngắn</label>
+    <textarea name="description" rows="2" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"><%= product.description || '' %></textarea>
+  </div>
+  <div>
+    <label class="text-xs font-semibold text-secondary">Mô tả chi tiết</label>
+    <textarea name="long_description" rows="4" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"><%= product.long_description || '' %></textarea>
+  </div>
+  <!-- Gallery manager -->
+  <div class="border border-surface-container-high rounded-xl p-4 space-y-4">
+    <div class="flex items-center justify-between">
+      <label class="text-sm font-bold text-on-surface">Thư viện ảnh sản phẩm</label>
+      <span class="text-xs text-secondary">Chọn <strong class="text-primary">Ảnh chính</strong>, bỏ tick <em>Giữ</em> để xóa ảnh</span>
+    </div>
+
+    <% const gallery = (typeof images !== 'undefined' && images) ? images : []; %>
+    <% if (gallery.length) { %>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <% gallery.forEach((im, i) => { %>
+      <div class="border border-surface-container-high rounded-xl overflow-hidden bg-surface-container-low">
+        <div class="aspect-square bg-white"><img src="<%= im %>" class="w-full h-full object-contain"></div>
+        <div class="p-2 space-y-1.5 text-xs">
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="radio" name="main_image" value="<%= im %>" <%= i === 0 ? 'checked' : '' %> class="accent-[#972b25]"> Ảnh chính
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer text-secondary">
+            <input type="checkbox" name="keep_images" value="<%= im %>" checked class="accent-[#972b25]"> Giữ ảnh
+          </label>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } else { %>
+      <p class="text-xs text-secondary">Chưa có ảnh nào. Thêm ảnh bên dưới.</p>
+    <% } %>
+
+    <!-- Images picked from the media library -->
+    <div id="pickedImages" class="grid grid-cols-2 sm:grid-cols-4 gap-3 empty:hidden"></div>
+
+    <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-surface-container-high">
+      <button type="button" onclick="openMediaPicker()" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-surface-container">
+        <span class="material-symbols-outlined text-[18px]">perm_media</span> Chọn từ thư viện
+      </button>
+      <a href="/admin/media" target="_blank" class="text-xs text-secondary hover:text-primary underline">Mở thư viện ảnh</a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+      <div>
+        <label class="text-xs font-semibold text-secondary">Tải ảnh mới lên (chọn nhiều ảnh)</label>
+        <input name="gallery_files" type="file" accept="image/*" multiple class="w-full mt-1 text-sm">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-secondary">Hoặc dán URL ảnh (mỗi dòng 1 ảnh)</label>
+        <textarea name="gallery_urls" rows="2" placeholder="https://...&#10;https://..." class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></textarea>
+      </div>
+    </div>
+    <p class="text-xs text-secondary">Ảnh tải lên được lưu vào thư viện (thư mục "san-pham"). Nếu không chọn "Ảnh chính", hệ thống dùng ảnh đầu tiên.</p>
+  </div>
+
+  <!-- Media picker modal -->
+  <div id="mediaModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onclick="if(event.target===this)closeMediaPicker()">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-surface-container-high">
+        <h3 class="font-bold">Chọn ảnh từ thư viện</h3>
+        <button type="button" onclick="closeMediaPicker()" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface-container"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div id="mediaFolderTabs" class="flex items-center gap-2 px-5 py-3 border-b border-surface-container-high overflow-x-auto"></div>
+      <div id="mediaGrid" class="p-5 grid grid-cols-3 sm:grid-cols-4 gap-3 overflow-y-auto"></div>
+      <div class="px-5 py-3 border-t border-surface-container-high flex justify-end">
+        <button type="button" onclick="closeMediaPicker()" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container">Xong</button>
+      </div>
+    </div>
+  </div>
+  <!-- Per-product feature badges -->
+  <div class="border border-surface-container-high rounded-xl p-4 space-y-3">
+    <div>
+      <label class="text-sm font-bold text-on-surface">Thông số nổi bật (hiển thị ở trang sản phẩm)</label>
+      <p class="text-xs text-secondary">Tối đa 3 mục, ví dụ: Bảo hành 2 năm, Giao nhanh 24H, 30 ngày đổi trả. Để trống dòng nào thì ẩn.</p>
+    </div>
+    <%
+      var feats = [];
+      try { feats = JSON.parse(product.features || '[]'); } catch (e) {}
+      if (!feats.length) feats = [{icon:'verified_user',text:'Bảo hành 2 năm'},{icon:'local_shipping',text:'Giao nhanh 24H'},{icon:'sync',text:'30 ngày đổi trả'}];
+      while (feats.length < 3) feats.push({icon:'verified_user',text:''});
+      var iconOpts = ['verified_user','local_shipping','sync','workspace_premium','bolt','payments','inventory_2','support_agent','autorenew','shield','eco','military_tech','qr_code_2','package_2'];
+    %>
+    <% for (var i=0; i<3; i++) { var f = feats[i] || {icon:'verified_user',text:''}; %>
+    <div class="flex items-center gap-2">
+      <select name="feature_icon" class="px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none text-sm shrink-0 w-44">
+        <% iconOpts.forEach(function(ic){ %><option value="<%= ic %>" <%= f.icon===ic?'selected':'' %>><%= ic %></option><% }) %>
+      </select>
+      <span class="material-symbols-outlined text-primary text-[22px] shrink-0"><%= f.icon %></span>
+      <input name="feature_text" value="<%= f.text %>" placeholder="VD: Bảo hành 2 năm" class="flex-1 px-4 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+    </div>
+    <% } %>
+  </div>
+
+  <label class="flex items-center gap-2 text-sm">
+    <input type="checkbox" name="active" value="1" <%= (product.active === undefined || product.active) ? 'checked' : '' %> class="accent-[#972b25]"> Hiển thị sản phẩm trên cửa hàng
+  </label>
+  <div class="flex gap-3 pt-2">
+    <button type="submit" class="px-6 py-3 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container">Lưu sản phẩm</button>
+    <a href="/admin/products" class="px-6 py-3 rounded-xl border border-outline-variant text-sm font-semibold hover:bg-surface-container">Hủy</a>
+  </div>
+</form>
+
+<script>
+  var MEDIA = <%- JSON.stringify(mediaByFolder || {}) %>;
+  var picked = {};
+
+  function openMediaPicker() {
+    var tabs = document.getElementById('mediaFolderTabs');
+    var folders = Object.keys(MEDIA);
+    if (!folders.length) {
+      document.getElementById('mediaGrid').innerHTML = '<p class="col-span-full text-sm text-secondary text-center py-8">Thư viện chưa có ảnh. Vào "Thư viện ảnh" để tải lên.</p>';
+      tabs.innerHTML = '';
+    } else {
+      tabs.innerHTML = folders.map(function (f, i) {
+        return '<button type="button" data-folder="' + f + '" onclick="showFolder(\'' + f + '\')" class="media-tab px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 ' + (i === 0 ? 'bg-primary text-on-primary' : 'bg-surface-container text-secondary') + '">' + f + '</button>';
+      }).join('');
+      showFolder(folders[0]);
+    }
+    document.getElementById('mediaModal').classList.remove('hidden');
+  }
+  function closeMediaPicker() { document.getElementById('mediaModal').classList.add('hidden'); }
+
+  function showFolder(f) {
+    document.querySelectorAll('.media-tab').forEach(function (b) {
+      var on = b.dataset.folder === f;
+      b.classList.toggle('bg-primary', on); b.classList.toggle('text-on-primary', on);
+      b.classList.toggle('bg-surface-container', !on); b.classList.toggle('text-secondary', !on);
+    });
+    var grid = document.getElementById('mediaGrid');
+    var imgs = MEDIA[f] || [];
+    grid.innerHTML = imgs.map(function (url) {
+      var sel = picked[url] ? 'ring-2 ring-primary' : '';
+      return '<button type="button" onclick="togglePick(\'' + url + '\', this)" class="aspect-square rounded-xl overflow-hidden border border-surface-container-high bg-white ' + sel + '"><img src="' + url + '" class="w-full h-full object-contain"></button>';
+    }).join('') || '<p class="col-span-full text-sm text-secondary text-center py-8">Thư mục trống.</p>';
+  }
+
+  function togglePick(url, el) {
+    if (picked[url]) { removePicked(url); if (el) el.classList.remove('ring-2','ring-primary'); }
+    else { addPicked(url); if (el) el.classList.add('ring-2','ring-primary'); }
+  }
+
+  function addPicked(url) {
+    if (picked[url]) return;
+    var wrap = document.getElementById('pickedImages');
+    var card = document.createElement('div');
+    card.className = 'border border-surface-container-high rounded-xl overflow-hidden bg-surface-container-low';
+    card.dataset.url = url;
+    card.innerHTML =
+      '<div class="aspect-square bg-white"><img src="' + url + '" class="w-full h-full object-contain"></div>' +
+      '<div class="p-2 space-y-1.5 text-xs">' +
+        '<label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="main_image" value="' + url + '" class="accent-[#972b25]"> Ảnh chính</label>' +
+        '<input type="hidden" name="library_images" value="' + url + '">' +
+        '<button type="button" class="text-secondary hover:text-primary" onclick="removePicked(\'' + url + '\')">Bỏ chọn</button>' +
+      '</div>';
+    wrap.appendChild(card);
+    picked[url] = true;
+  }
+
+  function removePicked(url) {
+    picked[url] = false;
+    var wrap = document.getElementById('pickedImages');
+    var card = wrap.querySelector('[data-url="' + CSS.escape(url) + '"]');
+    if (card) card.remove();
+    var btn = document.querySelector('#mediaGrid button[onclick*="' + url + '"]');
+    if (btn) btn.classList.remove('ring-2','ring-primary');
+  }
+</script>
+<%- include('../partials/admin-layout-bottom') %>

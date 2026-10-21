@@ -1,0 +1,48 @@
+    </main>
+  </div>
+</div>
+<script>
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('details.account-menu[open]').forEach(function (d) {
+      if (!d.contains(e.target)) d.removeAttribute('open');
+    });
+  });
+  function applyThemeIcon(){ var d=document.documentElement.getAttribute('data-theme')==='dark'; var el=document.getElementById('themeIcon'); if(el) el.innerText=d?'light_mode':'dark_mode'; }
+  function toggleTheme(){ var d=document.documentElement.getAttribute('data-theme')==='dark'; if(d){document.documentElement.removeAttribute('data-theme');try{localStorage.setItem('theme','light');}catch(e){}}else{document.documentElement.setAttribute('data-theme','dark');try{localStorage.setItem('theme','dark');}catch(e){}} applyThemeIcon(); }
+  applyThemeIcon();
+  // Poll new-order notifications
+  var prevUnseen = <%= typeof unseenCount !== 'undefined' ? unseenCount : 0 %>;
+  function fmtVND(n){ return (Number(n)||0).toLocaleString('vi-VN') + '₫'; }
+  async function pollNotifications() {
+    try {
+      var r = await fetch('/admin/api/notifications', { headers: { 'Accept': 'application/json' } });
+      if (!r.ok) return;
+      var d = await r.json();
+      var bell = document.querySelector('.js-bell-badge');
+      var navBadge = document.querySelector('.js-order-badge');
+      [bell, navBadge].forEach(function (el) {
+        if (!el) return;
+        el.textContent = d.unseen;
+        el.classList.toggle('hidden', d.unseen === 0);
+      });
+      var list = document.querySelector('.js-bell-list');
+      if (list) {
+        if (!d.orders.length) list.innerHTML = '<p class="px-4 py-6 text-sm text-secondary text-center">Không có đơn mới.</p>';
+        else list.innerHTML = d.orders.map(function (o) {
+          return '<a href="/admin/orders/' + o.id + '" class="block px-4 py-3 hover:bg-surface-container border-b border-surface-container-high last:border-0">'
+            + '<div class="flex items-center justify-between"><span class="font-semibold text-sm">#' + o.code + '</span><span class="text-primary font-semibold text-sm">' + fmtVND(o.total) + '</span></div>'
+            + '<p class="text-xs text-secondary">' + o.customer_name + ' · ' + o.created_at + '</p></a>';
+        }).join('');
+      }
+      if (d.unseen > prevUnseen) {
+        document.title = '(' + d.unseen + ') ' + document.title.replace(/^\(\d+\)\s*/, '');
+        try { new Audio('data:audio/mpeg;base64,').play().catch(function(){}); } catch (e) {}
+      }
+      prevUnseen = d.unseen;
+    } catch (e) {}
+  }
+  setInterval(pollNotifications, 20000);
+</script>
+<script src="/js/ui.js" defer></script>
+</body>
+</html>

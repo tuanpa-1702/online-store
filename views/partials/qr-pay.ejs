@@ -1,0 +1,32 @@
+<%
+  // params: amount (optional), addInfo (optional)
+  const _amount = typeof amount !== 'undefined' ? amount : 0;
+  const _info = typeof addInfo !== 'undefined' ? addInfo : '';
+  const _qr = vietqr(settings, _amount, _info) || settings.qr_image || '';
+%>
+<% if (_qr) { %>
+<div class="w-full max-w-[300px] mx-auto rounded-3xl overflow-hidden border border-primary/30 shadow-sm bg-surface-container-lowest">
+  <div class="bg-primary text-on-primary text-center py-3 px-4">
+    <p class="font-display font-bold text-base leading-tight">Quét mã để thanh toán</p>
+    <p class="text-[11px] opacity-90"><%= settings.bank_name %> · VietQR / Napas 247</p>
+  </div>
+  <div class="p-4 flex flex-col items-center gap-3">
+    <div class="rounded-2xl border-2 border-primary/20 p-2 bg-white">
+      <img src="<%= _qr %>" alt="QR thanh toán" class="w-56 h-56 object-contain">
+    </div>
+    <div class="w-full text-center">
+      <p class="text-sm font-semibold text-on-surface"><%= settings.bank_holder %></p>
+      <p class="text-lg font-display font-bold text-primary tracking-wide"><%= settings.bank_account %></p>
+      <% if (_amount) { %>
+      <div class="mt-2 inline-flex flex-col gap-0.5 bg-surface-container-low rounded-xl px-4 py-2">
+        <span class="text-xs text-secondary">Số tiền <strong class="text-primary text-sm"><%= fmt(_amount) %></strong></span>
+        <% if (_info) { %><span class="text-xs text-secondary">Nội dung <strong class="text-primary"><%= _info %></strong></span><% } %>
+      </div>
+      <% } %>
+    </div>
+    <a href="/qr-download.png?amount=<%= Math.round(_amount || 0) %>&info=<%= encodeURIComponent(_info || '') %>" download class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-primary text-primary text-sm font-semibold hover:bg-primary hover:text-on-primary transition">
+      <span class="material-symbols-outlined text-[18px]">download</span> Tải ảnh QR
+    </a>
+  </div>
+</div>
+<% } %>

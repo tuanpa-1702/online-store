@@ -1,0 +1,137 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="max-w-[1360px] mx-auto px-5 md:px-8 py-8 w-full flex-grow">
+  <!-- Hero (compact) -->
+  <% const slides = products.slice(0, 10); %>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center mb-10 mt-1">
+    <div class="lg:col-span-4 flex flex-col gap-3">
+      <span class="text-sm text-secondary italic font-display"><%= settings.hero_eyebrow || '' %></span>
+      <h1 class="font-display font-extrabold text-2xl md:text-3xl text-on-surface leading-tight"><%= settings.hero_title %></h1>
+      <p class="text-sm text-secondary max-w-md leading-relaxed"><%= settings.hero_subtitle %></p>
+      <div class="flex items-center gap-4 pt-1">
+        <a href="#products" class="inline-flex items-center px-5 py-2.5 rounded-full bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container transition-all">Xem sản phẩm</a>
+        <a href="/about" class="text-sm font-semibold text-on-surface underline decoration-outline-variant underline-offset-4 hover:decoration-primary">Về chúng tôi</a>
+      </div>
+    </div>
+
+    <!-- Slider -->
+    <% if (slides.length) { %>
+    <div class="lg:col-span-8">
+      <div id="heroSlider" class="relative overflow-hidden rounded-2xl bg-surface-container-low aspect-[16/9] sm:aspect-[21/9] group">
+        <div id="heroTrack" class="flex h-full transition-transform duration-500 ease-out">
+          <% slides.forEach(p => { %>
+          <a href="/product/<%= p.slug %>" class="relative w-full h-full shrink-0 block">
+            <img src="<%= p.image %>" alt="<%= p.name %>" class="w-full h-full object-cover">
+            <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/55 to-transparent pointer-events-none"></div>
+            <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+              <p class="text-white/85 text-[11px] uppercase tracking-wider drop-shadow"><%= p.category %></p>
+              <p class="text-white font-display font-bold text-base sm:text-lg leading-tight line-clamp-1 drop-shadow"><%= p.name %></p>
+            </div>
+          </a>
+          <% }) %>
+        </div>
+        <% if (slides.length > 1) { %>
+        <button type="button" onclick="heroGo(-1)" aria-label="Trước" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-surface/80 hover:bg-surface text-on-surface flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition"><span class="material-symbols-outlined text-[20px]">chevron_left</span></button>
+        <button type="button" onclick="heroGo(1)" aria-label="Sau" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-surface/80 hover:bg-surface text-on-surface flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition"><span class="material-symbols-outlined text-[20px]">chevron_right</span></button>
+        <div id="heroDots" class="absolute bottom-3 right-4 flex items-center gap-1.5"></div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Filters -->
+  <section id="products" class="flex flex-col gap-4 mb-6 scroll-mt-24">
+    <div class="flex items-end justify-between flex-wrap gap-2">
+      <div>
+        <h2 class="font-display font-bold text-2xl md:text-3xl text-on-surface"><%= settings.home_products_title || 'Hàng đang có tại chợ' %></h2>
+        <p class="text-sm text-secondary mt-1"><%= settings.home_products_subtitle || '' %></p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 overflow-x-auto pb-1">
+      <a href="/#products" class="px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition <%= !activeCategory ? 'bg-primary text-on-primary shadow-sm' : 'bg-surface-container-low text-secondary hover:bg-surface-container' %>">Tất cả</a>
+      <% categories.forEach(c => { %>
+        <a href="/?category=<%= encodeURIComponent(c) %>#products" class="px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition <%= activeCategory === c ? 'bg-primary text-on-primary shadow-sm' : 'bg-surface-container-low text-secondary hover:bg-surface-container' %>"><%= c %></a>
+      <% }) %>
+    </div>
+    <div class="flex items-center justify-between bg-surface-container-low p-3 rounded-xl">
+      <span class="text-sm text-secondary">Hiển thị <strong class="text-on-surface"><%= products.length %></strong> sản phẩm</span>
+      <form method="get" class="flex items-center gap-2 bg-surface rounded-lg px-3 py-1 shadow-sm">
+        <% if (activeCategory) { %><input type="hidden" name="category" value="<%= activeCategory %>"><% } %>
+        <% if (q) { %><input type="hidden" name="q" value="<%= q %>"><% } %>
+        <span class="material-symbols-outlined text-[16px] text-secondary">sort</span>
+        <select name="sort" onchange="sortGo('<%= activeCategory %>', '<%= q %>', this.value)" class="bg-transparent text-on-surface text-xs font-semibold outline-none cursor-pointer">
+          <option value="newest" <%= sort==='newest'?'selected':'' %>>Mới nhất</option>
+          <option value="best-seller" <%= sort==='best-seller'?'selected':'' %>>Bán chạy nhất</option>
+          <option value="price-asc" <%= sort==='price-asc'?'selected':'' %>>Giá: Thấp đến Cao</option>
+          <option value="price-desc" <%= sort==='price-desc'?'selected':'' %>>Giá: Cao đến Thấp</option>
+        </select>
+      </form>
+    </div>
+  </section>
+
+  <!-- Products grid -->
+  <% if (products.length === 0) { %>
+    <div class="text-center py-20 text-secondary">Không tìm thấy sản phẩm nào.</div>
+  <% } else { %>
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+      <% products.forEach(p => { %>
+        <%- include('partials/product-card', { p }) %>
+      <% }) %>
+    </section>
+  <% } %>
+
+  <!-- Lời hứa của chợ -->
+  <section class="border-t border-surface-container-high pt-10 mb-6">
+    <h2 class="font-display font-bold text-2xl md:text-3xl text-on-surface mb-8 max-w-xl"><%= settings.home_promise_title || 'Vài điều tụi mình luôn giữ lời' %></h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+      <% const commits = [
+        ['01', settings.promise1_title, settings.promise1_desc],
+        ['02', settings.promise2_title, settings.promise2_desc],
+        ['03', settings.promise3_title, settings.promise3_desc],
+      ].filter(c => c[1] || c[2]); %>
+      <% commits.forEach(c => { %>
+      <div>
+        <span class="font-display text-primary text-lg"><%= c[0] %></span>
+        <h3 class="font-display font-bold text-lg text-on-surface mt-2"><%= c[1] %></h3>
+        <p class="text-sm text-secondary mt-2 leading-relaxed"><%= c[2] %></p>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+</main>
+<script>
+  function sortGo(cat, q, sort) {
+    var p = new URLSearchParams();
+    if (cat) p.set('category', cat);
+    if (q) p.set('q', q);
+    if (sort) p.set('sort', sort);
+    var qs = p.toString();
+    location.href = '/' + (qs ? '?' + qs : '') + '#products';
+  }
+  (function () {
+    var track = document.getElementById('heroTrack');
+    if (!track) return;
+    var n = track.children.length;
+    if (n <= 1) return;
+    var i = 0, timer;
+    var dotsWrap = document.getElementById('heroDots');
+    function render() {
+      track.style.transform = 'translateX(-' + (i * 100) + '%)';
+      if (dotsWrap) Array.prototype.forEach.call(dotsWrap.children, function (d, x) {
+        d.className = 'rounded-full transition-all ' + (x === i ? 'w-5 h-2 bg-white' : 'w-2 h-2 bg-white/50');
+      });
+    }
+    function reset() { clearInterval(timer); timer = setInterval(function () { i = (i + 1) % n; render(); }, 4000); }
+    window.heroGo = function (dir) { i = (i + dir + n) % n; render(); reset(); };
+    if (dotsWrap) for (var k = 0; k < n; k++) {
+      var d = document.createElement('button');
+      d.type = 'button';
+      d.className = 'w-2 h-2 rounded-full bg-white/50';
+      d.onclick = (function (x) { return function () { i = x; render(); reset(); }; })(k);
+      dotsWrap.appendChild(d);
+    }
+    render(); reset();
+  })();
+</script>
+<%- include('partials/footer') %>

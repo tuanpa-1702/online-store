@@ -1,0 +1,150 @@
+<%- include('../partials/admin-layout-top') %>
+<% if (saved) { %><div class="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-sm mb-5 border border-emerald-200">Đã lưu cấu hình thành công.</div><% } %>
+
+<form action="/admin/settings" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_tab" id="currentTab" value="chung">
+
+  <!-- Tabs -->
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-5 border-b border-surface-container-high">
+    <% const tabs = [['chung','Chung','store'],['trang-chu','Trang chủ','web'],['thanh-toan','Thanh toán','qr_code_2'],['van-chuyen','Vận chuyển','local_shipping'],['email','Email','mail'],['gioi-thieu','Giới thiệu','info']]; %>
+    <% tabs.forEach((t, i) => { %>
+      <button type="button" data-tab-btn="<%= t[0] %>" onclick="showTab('<%= t[0] %>')" class="tab-btn flex items-center gap-1.5 px-4 py-2.5 rounded-t-lg text-sm font-semibold whitespace-nowrap border-b-2 <%= i===0 ? 'border-primary text-primary' : 'border-transparent text-secondary hover:text-on-surface' %>">
+        <span class="material-symbols-outlined text-[18px]"><%= t[2] %></span> <%= t[1] %>
+      </button>
+    <% }) %>
+  </div>
+
+  <!-- Chung -->
+  <section data-tab="chung" class="tab-pane space-y-4">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold">Thông tin chung</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-secondary">Tên website</label><input name="site_name" value="<%= settings.site_name %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div><label class="text-xs font-semibold text-secondary">Hotline</label><input name="hotline" value="<%= settings.hotline %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div><label class="text-xs font-semibold text-secondary">Email hỗ trợ</label><input name="support_email" value="<%= settings.support_email %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      </div>
+      <div><label class="text-xs font-semibold text-secondary">Thanh thông báo (để trống = ẩn thanh đen trên header)</label><input name="announcement" value="<%= settings.announcement %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+    </div>
+  </section>
+
+  <!-- Trang chủ -->
+  <section data-tab="trang-chu" class="tab-pane space-y-4 hidden">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold">Phần chào mừng (Hero)</h2>
+      <div><label class="text-xs font-semibold text-secondary">Dòng chào nhỏ (eyebrow)</label><input name="hero_eyebrow" value="<%= settings.hero_eyebrow %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      <div><label class="text-xs font-semibold text-secondary">Tiêu đề</label><input name="hero_title" value="<%= settings.hero_title %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      <div><label class="text-xs font-semibold text-secondary">Mô tả</label><textarea name="hero_subtitle" rows="2" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"><%= settings.hero_subtitle %></textarea></div>
+    </div>
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold">Khu sản phẩm</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-secondary">Tiêu đề khu sản phẩm</label><input name="home_products_title" value="<%= settings.home_products_title %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div><label class="text-xs font-semibold text-secondary">Mô tả ngắn</label><input name="home_products_subtitle" value="<%= settings.home_products_subtitle %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold">Khu "Lời hứa" (3 cam kết)</h2>
+      <div><label class="text-xs font-semibold text-secondary">Tiêu đề khu</label><input name="home_promise_title" value="<%= settings.home_promise_title %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      <% [1,2,3].forEach(i => { %>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+        <div><label class="text-xs font-semibold text-secondary">Cam kết <%= i %> — tiêu đề</label><input name="promise<%= i %>_title" value="<%= settings['promise'+i+'_title'] %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div class="sm:col-span-2"><label class="text-xs font-semibold text-secondary">Cam kết <%= i %> — mô tả</label><input name="promise<%= i %>_desc" value="<%= settings['promise'+i+'_desc'] %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- Thanh toán -->
+  <section data-tab="thanh-toan" class="tab-pane space-y-4 hidden">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary">qr_code_2</span> Thanh toán & QR</h2>
+      <div class="flex flex-col sm:flex-row gap-5 items-start">
+        <div class="shrink-0">
+          <label class="text-xs font-semibold text-secondary block mb-1">Xem trước QR (VietQR)</label>
+          <% const previewQr = vietqr(settings, 0, '') || settings.qr_image; %>
+          <% if (previewQr) { %><img src="<%= previewQr %>" class="w-36 h-36 rounded-xl border border-primary/30 object-contain bg-white p-1 mb-2"><% } else { %><div class="w-36 h-36 rounded-xl border border-dashed border-outline-variant flex items-center justify-center text-xs text-secondary text-center p-2">Nhập mã NH + số TK để tạo QR</div><% } %>
+          <p class="text-[11px] text-secondary">QR cho khách sẽ tự kèm số tiền & mã đơn.</p>
+        </div>
+        <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label class="text-xs font-semibold text-secondary">Ngân hàng (hiển thị)</label><input name="bank_name" value="<%= settings.bank_name %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+          <div><label class="text-xs font-semibold text-secondary">Mã ngân hàng VietQR</label><input name="bank_code" value="<%= settings.bank_code %>" placeholder="TPB, VCB, MB, TCB..." class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+          <div><label class="text-xs font-semibold text-secondary">Số tài khoản</label><input name="bank_account" value="<%= settings.bank_account %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+          <div><label class="text-xs font-semibold text-secondary">Chủ tài khoản</label><input name="bank_holder" value="<%= settings.bank_holder %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        </div>
+      </div>
+      <div class="pt-2 border-t border-surface-container-high">
+        <label class="text-xs font-semibold text-secondary block mb-1">Ảnh QR tĩnh (tùy chọn — chỉ dùng khi không điền mã NH VietQR)</label>
+        <% if (settings.qr_image) { %><img src="<%= settings.qr_image %>" class="w-24 h-24 rounded-xl border border-outline-variant object-contain bg-white p-1 mb-2"><% } %>
+        <input name="qr_file" type="file" accept="image/*" class="text-sm">
+      </div>
+    </div>
+  </section>
+
+  <!-- Vận chuyển -->
+  <section data-tab="van-chuyen" class="tab-pane space-y-4 hidden">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary">local_shipping</span> Vận chuyển</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-secondary">Phí vận chuyển (₫)</label><input name="shipping_fee" type="number" value="<%= settings.shipping_fee %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div><label class="text-xs font-semibold text-secondary">Miễn phí ship từ (₫)</label><input name="free_ship_threshold" type="number" value="<%= settings.free_ship_threshold %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Email -->
+  <section data-tab="email" class="tab-pane space-y-4 hidden">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary">mail</span> Gửi email (SMTP)</h2>
+      <p class="text-xs text-secondary">Dùng để gửi email xác nhận đặt hàng và cập nhật tiến độ đơn cho khách. Với Gmail: bật 2FA rồi tạo <strong>App Password</strong> (16 ký tự) và dán vào ô mật khẩu.</p>
+      <label class="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="mail_enabled" value="1" <%= settings.mail_enabled === '1' ? 'checked' : '' %> class="accent-[#972b25]"> Bật gửi email</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-secondary">SMTP host</label><input name="mail_host" value="<%= settings.mail_host %>" placeholder="smtp.gmail.com" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div><label class="text-xs font-semibold text-secondary">Cổng (port)</label><input name="mail_port" value="<%= settings.mail_port %>" placeholder="587" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div><label class="text-xs font-semibold text-secondary">Email gửi (Gmail)</label><input name="mail_user" value="<%= settings.mail_user %>" placeholder="shop@gmail.com" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div><label class="text-xs font-semibold text-secondary">Tên người gửi</label><input name="mail_from_name" value="<%= settings.mail_from_name %>" placeholder="Chợ Trời" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+        <div class="sm:col-span-2"><label class="text-xs font-semibold text-secondary">Mật khẩu ứng dụng (App Password)</label><input name="mail_pass" type="password" placeholder="<%= settings.mail_pass ? '•••••••• (đã lưu — để trống nếu không đổi)' : 'Dán App Password 16 ký tự' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      </div>
+      <label class="flex items-center gap-2 text-sm text-secondary"><input type="checkbox" name="mail_secure" value="1" <%= settings.mail_secure === '1' ? 'checked' : '' %> class="accent-[#972b25]"> Dùng SSL (cổng 465). Bỏ chọn nếu dùng cổng 587 (STARTTLS).</label>
+    </div>
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm">
+      <h3 class="font-bold mb-2">Gửi email thử</h3>
+      <% if (typeof query !== 'undefined' && query.mail_test) { %><div class="bg-surface-container-low text-on-surface px-4 py-2.5 rounded-lg text-sm mb-3"><%= query.mail_test %></div><% } %>
+      <p class="text-xs text-secondary mb-3">Lưu cấu hình trước, rồi gửi thử để kiểm tra.</p>
+      <form action="/admin/settings/test-email" method="post" class="flex flex-col sm:flex-row gap-2">
+        <input name="to" type="email" placeholder="Email nhận thử (mặc định: email của bạn)" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+        <button class="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container shrink-0">Gửi email thử</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Giới thiệu -->
+  <section data-tab="gioi-thieu" class="tab-pane space-y-4 hidden">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm space-y-4">
+      <h2 class="font-bold">Giới thiệu</h2>
+      <div><label class="text-xs font-semibold text-secondary">Giới thiệu ngắn (footer)</label><textarea name="intro" rows="2" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"><%= settings.intro %></textarea></div>
+      <div><label class="text-xs font-semibold text-secondary">Về chúng tôi (trang About)</label><textarea name="about" rows="5" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"><%= settings.about %></textarea></div>
+    </div>
+  </section>
+
+  <div class="sticky bottom-0 mt-6 bg-background/80 backdrop-blur py-3">
+    <button type="submit" class="px-8 py-3 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container shadow-sm">Lưu cấu hình</button>
+  </div>
+</form>
+
+<script>
+  function showTab(t) {
+    document.querySelectorAll('.tab-pane').forEach(function (p) { p.classList.toggle('hidden', p.dataset.tab !== t); });
+    document.querySelectorAll('.tab-btn').forEach(function (b) {
+      var on = b.dataset.tabBtn === t;
+      b.classList.toggle('border-primary', on); b.classList.toggle('text-primary', on);
+      b.classList.toggle('border-transparent', !on); b.classList.toggle('text-secondary', !on);
+    });
+    document.getElementById('currentTab').value = t;
+  }
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var t = params.get('tab');
+    if (t && document.querySelector('[data-tab="' + t + '"]')) showTab(t);
+  })();
+</script>
+<%- include('../partials/admin-layout-bottom') %>

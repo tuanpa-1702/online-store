@@ -1,0 +1,167 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<% function stars(n){ n = Math.round(n)||0; var s=''; for(var i=1;i<=5;i++){ s += '<span class="material-symbols-outlined text-[16px] '+(i<=n?'text-amber-500':'text-outline-variant')+'" style="font-variation-settings:\'FILL\' 1;">star</span>'; } return s; } %>
+<main class="flex-grow max-w-[1100px] mx-auto px-5 md:px-8 py-8 w-full">
+  <div class="flex items-center gap-4 mb-6">
+    <% if (currentUser.avatar) { %>
+      <img src="<%= currentUser.avatar %>" class="w-16 h-16 rounded-full object-cover border border-outline-variant">
+    <% } else { %>
+      <span class="w-16 h-16 rounded-full bg-primary text-on-primary flex items-center justify-center text-2xl font-bold"><%= (currentUser.name || 'U').charAt(0).toUpperCase() %></span>
+    <% } %>
+    <div>
+      <h1 class="font-display text-2xl font-semibold text-on-surface"><%= currentUser.name %></h1>
+      <p class="text-sm text-secondary"><%= currentUser.email %></p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex items-center gap-1 overflow-x-auto border-b border-surface-container-high mb-6">
+    <% const atabs = [['orders','Đơn hàng','receipt_long'],['purchases','Lịch sử mua hàng','history'],['addresses','Sổ địa chỉ','location_on'],['reviews','Lịch sử đánh giá','star']]; %>
+    <% atabs.forEach(t => { %>
+      <a href="/account?tab=<%= t[0] %>" class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold whitespace-nowrap border-b-2 <%= tab===t[0] ? 'border-primary text-primary' : 'border-transparent text-secondary hover:text-on-surface' %>">
+        <span class="material-symbols-outlined text-[18px]"><%= t[2] %></span> <%= t[1] %>
+      </a>
+    <% }) %>
+  </div>
+
+  <!-- Orders -->
+  <% if (tab === 'orders') { %>
+    <% if (!orders.length) { %>
+      <div class="bg-surface-container-lowest rounded-2xl p-12 text-center border border-surface-container-high">
+        <p class="text-secondary">Bạn chưa có đơn hàng nào.</p>
+        <a href="/" class="inline-block mt-4 px-6 py-3 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container">Mua sắm ngay</a>
+      </div>
+    <% } else { %>
+      <div class="flex flex-col gap-3">
+        <% orders.forEach(o => { %>
+        <a href="/account/order/<%= o.code %>" class="bg-surface-container-lowest rounded-2xl p-5 border border-surface-container-high shadow-sm flex items-center justify-between gap-3 hover:border-primary transition">
+          <div class="min-w-0">
+            <p class="font-semibold text-on-surface">#<%= o.code %></p>
+            <p class="text-xs text-secondary mt-1"><%= o.created_at %> • <%= o.payment_method === 'bank' ? 'Chuyển khoản' : 'COD' %></p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="font-bold text-primary"><%= fmt(o.total) %></span>
+            <%- include('partials/status', { status: o.status }) %>
+          </div>
+        </a>
+        <% }) %>
+      </div>
+    <% } %>
+  <% } %>
+
+  <!-- Purchase history -->
+  <% if (tab === 'purchases') { %>
+    <% if (!purchases.length) { %>
+      <div class="bg-surface-container-lowest rounded-2xl p-12 text-center border border-surface-container-high"><p class="text-secondary">Chưa có sản phẩm nào đã mua.</p></div>
+    <% } else { %>
+      <div class="flex flex-col gap-3">
+        <% purchases.forEach(p => { const rv = reviewedMap[p.product_id]; %>
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-surface-container-high shadow-sm">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-xl overflow-hidden bg-surface-container-low shrink-0"><img src="<%= p.image %>" class="w-full h-full object-cover"></div>
+            <div class="flex-1 min-w-0">
+              <% if (p.slug) { %><a href="/product/<%= p.slug %>" class="font-semibold text-on-surface hover:text-primary line-clamp-1"><%= p.name %></a><% } else { %><span class="font-semibold line-clamp-1"><%= p.name %></span><% } %>
+              <p class="text-xs text-secondary mt-0.5">Đã mua <%= p.total_qty %> • Lần cuối <%= p.last_bought %></p>
+              <% if (rv) { %><div class="flex items-center gap-1 mt-1"><%- stars(rv.rating) %><span class="text-xs text-secondary ml-1">Bạn đã đánh giá</span></div><% } %>
+            </div>
+            <details class="account-menu shrink-0">
+              <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer px-3 py-2 rounded-lg text-sm font-semibold <%= rv ? 'text-secondary hover:text-primary' : 'bg-primary text-on-primary hover:bg-primary-container' %>"><%= rv ? 'Sửa đánh giá' : 'Đánh giá' %></summary>
+              <form action="/account/review" method="post" class="mt-3 space-y-2">
+                <input type="hidden" name="product_id" value="<%= p.product_id %>">
+                <div>
+                  <label class="text-xs font-semibold text-secondary">Số sao</label>
+                  <select name="rating" class="w-full mt-1 px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none text-sm">
+                    <% [5,4,3,2,1].forEach(n => { %><option value="<%= n %>" <%= rv && rv.rating===n ? 'selected' : '' %>><%= n %> sao</option><% }) %>
+                  </select>
+                </div>
+                <textarea name="comment" rows="2" placeholder="Cảm nhận của bạn..." class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none text-sm"><%= rv ? rv.comment : '' %></textarea>
+                <div class="flex gap-2">
+                  <button class="px-4 py-2 rounded-lg bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container">Gửi đánh giá</button>
+                  <button type="button" onclick="this.closest('details').removeAttribute('open')" class="px-4 py-2 rounded-lg border border-outline-variant text-sm font-semibold text-secondary hover:bg-surface-container">Hủy</button>
+                </div>
+              </form>
+            </details>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    <% } %>
+  <% } %>
+
+  <!-- Addresses -->
+  <% if (tab === 'addresses') { %>
+    <div class="flex flex-col gap-3 max-w-2xl">
+      <% if (!addresses.length) { %>
+        <p class="text-sm text-secondary bg-surface-container-lowest border border-surface-container-high rounded-2xl p-5">Bạn chưa lưu địa chỉ nào. Thêm địa chỉ để thanh toán nhanh hơn ở lần sau.</p>
+      <% } %>
+      <% addresses.forEach(a => { %>
+      <div class="bg-surface-container-lowest border <%= a.is_default ? 'border-primary' : 'border-surface-container-high' %> rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-semibold text-on-surface"><%= a.recipient_name %></span>
+          <span class="text-secondary text-sm">· <%= a.phone %></span>
+          <% if (a.is_default) { %><span class="text-[11px] font-semibold text-primary bg-surface-container-highest px-2 py-0.5 rounded-full">Mặc định</span><% } %>
+        </div>
+        <p class="text-sm text-secondary mt-1"><%= a.address %></p>
+        <% if (a.note) { %><p class="text-xs text-secondary mt-1 italic">Ghi chú: <%= a.note %></p><% } %>
+        <div class="flex items-center gap-3 mt-3 pt-3 border-t border-surface-container-high text-xs font-semibold">
+          <% if (!a.is_default) { %><form action="/account/addresses/<%= a.id %>/default" method="post"><button class="text-secondary hover:text-primary">Đặt mặc định</button></form><% } %>
+          <details class="account-menu">
+            <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer text-secondary hover:text-primary">Sửa</summary>
+            <form action="/account/addresses/<%= a.id %>/edit" method="post" class="mt-3 space-y-2 font-normal">
+              <input name="recipient_name" value="<%= a.recipient_name %>" placeholder="Họ tên người nhận" class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+              <input name="phone" value="<%= a.phone %>" placeholder="Số điện thoại" class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+              <input name="address" value="<%= a.address %>" placeholder="Địa chỉ" class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+              <input name="note" value="<%= a.note %>" placeholder="Ghi chú (vd: công ty, chỉ giao giờ hành chính)" class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+              <label class="flex items-center gap-2 text-sm text-secondary"><input type="checkbox" name="is_default" value="1" <%= a.is_default ? 'checked' : '' %> class="accent-[#972b25]"> Đặt làm mặc định</label>
+              <div class="flex items-center gap-2">
+                <button class="px-4 py-2 rounded-lg bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container">Lưu thay đổi</button>
+                <button type="button" onclick="this.closest('details').removeAttribute('open')" class="px-4 py-2 rounded-lg border border-outline-variant text-sm font-semibold text-secondary hover:bg-surface-container">Hủy</button>
+              </div>
+            </form>
+          </details>
+          <form action="/account/addresses/<%= a.id %>/delete" method="post" onsubmit="return confirm('Xóa địa chỉ này?')"><button class="text-secondary hover:text-primary">Xóa</button></form>
+        </div>
+      </div>
+      <% }) %>
+      <details class="account-menu bg-surface-container-lowest border border-dashed border-outline-variant rounded-2xl p-5">
+        <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer flex items-center gap-2 text-sm font-semibold text-primary"><span class="material-symbols-outlined text-[20px]">add</span> Thêm địa chỉ mới</summary>
+        <form action="/account/addresses" method="post" class="mt-4 space-y-2">
+          <input name="recipient_name" value="<%= currentUser.name %>" placeholder="Họ tên người nhận" required class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          <input name="phone" placeholder="Số điện thoại" required class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          <input name="address" placeholder="Địa chỉ nhận hàng" required class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          <input name="note" placeholder="Ghi chú (vd: công ty, chỉ giao giờ hành chính)" class="w-full px-3 py-2 rounded-lg border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          <label class="flex items-center gap-2 text-sm text-secondary"><input type="checkbox" name="is_default" value="1" class="accent-[#972b25]"> Đặt làm mặc định</label>
+          <div class="flex items-center gap-2">
+            <button class="px-4 py-2 rounded-lg bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container">Lưu địa chỉ</button>
+            <button type="button" onclick="this.closest('details').removeAttribute('open')" class="px-4 py-2 rounded-lg border border-outline-variant text-sm font-semibold text-secondary hover:bg-surface-container">Hủy</button>
+          </div>
+        </form>
+      </details>
+    </div>
+  <% } %>
+
+  <!-- Reviews -->
+  <% if (tab === 'reviews') { %>
+    <% if (!reviews.length) { %>
+      <div class="bg-surface-container-lowest rounded-2xl p-12 text-center border border-surface-container-high">
+        <p class="text-secondary">Bạn chưa đánh giá sản phẩm nào.</p>
+        <a href="/account?tab=purchases" class="inline-block mt-4 px-6 py-3 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container">Đánh giá sản phẩm đã mua</a>
+      </div>
+    <% } else { %>
+      <div class="flex flex-col gap-3 max-w-2xl">
+        <% reviews.forEach(r => { %>
+        <div class="bg-surface-container-lowest rounded-2xl p-4 border border-surface-container-high shadow-sm flex gap-4">
+          <div class="w-14 h-14 rounded-xl overflow-hidden bg-surface-container-low shrink-0"><img src="<%= r.image %>" class="w-full h-full object-cover"></div>
+          <div class="min-w-0 flex-1">
+            <% if (r.slug) { %><a href="/product/<%= r.slug %>" class="font-semibold text-on-surface hover:text-primary line-clamp-1"><%= r.product_name %></a><% } else { %><span class="font-semibold line-clamp-1"><%= r.product_name %></span><% } %>
+            <div class="flex items-center gap-1 mt-0.5"><%- stars(r.rating) %><span class="text-xs text-secondary ml-1"><%= r.created_at %></span></div>
+            <% if (r.comment) { %><p class="text-sm text-secondary mt-1"><%= r.comment %></p><% } %>
+          </div>
+          <a href="/account?tab=purchases" class="text-xs font-semibold text-secondary hover:text-primary shrink-0">Sửa</a>
+        </div>
+        <% }) %>
+      </div>
+    <% } %>
+  <% } %>
+</main>
+<%- include('partials/footer') %>

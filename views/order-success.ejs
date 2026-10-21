@@ -1,0 +1,81 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="flex-grow max-w-[800px] mx-auto px-5 md:px-8 py-10 w-full">
+  <div class="bg-surface-container-lowest rounded-3xl p-8 border border-surface-container-high shadow-sm text-center">
+    <span class="material-symbols-outlined text-[64px] text-emerald-500" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    <h1 class="font-display text-2xl font-semibold text-on-surface mt-2">Đặt hàng thành công!</h1>
+    <p class="text-secondary mt-1">Cảm ơn bạn đã mua sắm tại <%= settings.site_name %>. Mã đơn hàng của bạn:</p>
+    <p class="text-2xl font-extrabold text-primary mt-2">#<%= order.code %></p>
+  </div>
+
+  <!-- Progress -->
+  <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm mt-6">
+    <h2 class="font-bold text-on-surface mb-5">Tiến độ đơn hàng</h2>
+    <%- include('partials/order-timeline', { order, history }) %>
+  </div>
+
+  <% if (order.payment_method === 'bank') { %>
+  <div class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant shadow-sm mt-6">
+    <h2 class="font-bold text-on-surface mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-primary">qr_code_2</span> Thông tin chuyển khoản</h2>
+
+    <% if (order.payment_status === 'paid') { %>
+      <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 rounded-xl px-4 py-3 text-sm font-semibold mb-4">
+        <span class="material-symbols-outlined text-[20px]">verified</span> Shop đã xác nhận nhận được thanh toán. Cảm ơn bạn!
+      </div>
+    <% } else if (order.payment_status === 'reported') { %>
+      <div class="flex items-center gap-2 bg-blue-50 text-blue-700 rounded-xl px-4 py-3 text-sm font-semibold mb-4">
+        <span class="material-symbols-outlined text-[20px]">hourglass_top</span> Bạn đã báo chuyển khoản. Shop đang kiểm tra và sẽ xác nhận sớm.
+      </div>
+    <% } %>
+
+    <div class="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+      <%- include('partials/qr-pay', { amount: order.total, addInfo: order.code, dl: order.code }) %>
+      <div class="text-sm space-y-1.5">
+        <p><strong>Ngân hàng:</strong> <%= settings.bank_name %></p>
+        <p><strong>Số tài khoản:</strong> <%= settings.bank_account %></p>
+        <p><strong>Chủ tài khoản:</strong> <%= settings.bank_holder %></p>
+        <p class="text-primary font-semibold">Số tiền: <%= fmt(order.total) %></p>
+        <p class="text-primary">Nội dung CK (bắt buộc ghi đúng): <strong><%= order.code %></strong></p>
+        <p class="text-xs text-secondary pt-1">Quét mã bằng app ngân hàng — số tiền và nội dung đã được điền sẵn.</p>
+      </div>
+    </div>
+
+    <% if (order.payment_status === 'unpaid') { %>
+    <form action="/order/<%= order.code %>/paid-report" method="post" class="mt-5" onsubmit="return confirm('Xác nhận bạn đã chuyển khoản với nội dung ' + '<%= order.code %>' + '?')">
+      <button class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">paid</span> Tôi đã chuyển khoản
+      </button>
+      <p class="text-xs text-secondary mt-2">Sau khi bạn bấm xác nhận, shop sẽ đối chiếu giao dịch và duyệt đơn. Vui lòng chuyển đúng số tiền và nội dung <strong><%= order.code %></strong> để được xử lý nhanh.</p>
+    </form>
+    <% } %>
+  </div>
+  <% } %>
+
+  <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm mt-6">
+    <h2 class="font-bold text-on-surface mb-4">Chi tiết đơn hàng</h2>
+    <div class="flex flex-col gap-3">
+      <% items.forEach(it => { %>
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low shrink-0"><img src="<%= it.image %>" class="w-full h-full object-cover"></div>
+        <p class="text-sm flex-1"><%= it.name %> <span class="text-secondary">× <%= it.qty %></span></p>
+        <p class="text-sm font-semibold"><%= fmt(it.price * it.qty) %></p>
+      </div>
+      <% }) %>
+    </div>
+    <div class="border-t border-surface-container-high mt-4 pt-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span class="text-secondary">Tạm tính</span><span><%= fmt(order.subtotal) %></span></div>
+      <div class="flex justify-between"><span class="text-secondary">Vận chuyển</span><span><%= order.shipping === 0 ? 'Miễn phí' : fmt(order.shipping) %></span></div>
+      <div class="flex justify-between font-bold text-base"><span>Tổng cộng</span><span class="text-primary"><%= fmt(order.total) %></span></div>
+    </div>
+    <div class="border-t border-surface-container-high mt-4 pt-4 text-sm text-secondary space-y-1">
+      <p><strong class="text-on-surface">Người nhận:</strong> <%= order.customer_name %> • <%= order.phone %></p>
+      <p><strong class="text-on-surface">Địa chỉ:</strong> <%= order.address %></p>
+    </div>
+  </div>
+
+  <div class="flex gap-3 mt-6">
+    <a href="/" class="flex-1 text-center py-3 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container">Tiếp tục mua sắm</a>
+    <% if (currentUser) { %><a href="/account" class="flex-1 text-center py-3 rounded-xl border border-outline-variant text-sm font-semibold hover:bg-surface-container">Xem đơn hàng của tôi</a><% } %>
+  </div>
+</main>
+<%- include('partials/footer') %>

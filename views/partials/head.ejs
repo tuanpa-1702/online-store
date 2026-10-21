@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title><%= typeof title !== 'undefined' ? title + ' • ' : '' %><%= settings.site_name || 'Chợ Trời' %></title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        primary: '#972b25', 'primary-container': '#b8433a',
+        'on-primary': '#ffffff', background: '#fff8f6', surface: '#fff8f6',
+        'surface-container-low': '#fbf2f0', 'surface-container': '#f5ecea',
+        'surface-container-high': '#efe6e4', 'surface-container-highest': '#e9e1df',
+        'surface-container-lowest': '#ffffff', 'on-surface': '#1e1b1a',
+        secondary: '#615d5d', 'outline-variant': '#dfbfbc', outline: '#8b716e',
+        'inverse-surface': '#342f2e', 'inverse-on-surface': '#f8efed',
+        tertiary: '#7c4235', 'tertiary-container': '#99594b',
+      },
+      fontFamily: { sans: ['Be Vietnam Pro', 'sans-serif'], display: ['Be Vietnam Pro', 'sans-serif'] },
+    }}
+  };
+</script>
+<style>
+  html { font-family: 'Be Vietnam Pro', sans-serif; color:#1e1b1a; scroll-behavior:smooth; }
+  body { -webkit-font-smoothing: antialiased; }
+  .font-display { font-family: 'Be Vietnam Pro', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* ===== Glassmorphism theme ===== */
+  :root { --glass-bg: rgba(255,255,255,0.55); --glass-strong: rgba(255,255,255,0.70); --glass-brd: rgba(255,255,255,0.60); }
+  body { background: linear-gradient(135deg,#fff5f2 0%,#fdebe7 45%,#fbeee9 100%); background-attachment: fixed; min-height:100vh; }
+  body::before {
+    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(620px circle at 10% 6%, rgba(151,43,37,0.14), transparent 60%),
+      radial-gradient(520px circle at 90% 16%, rgba(184,67,58,0.12), transparent 60%),
+      radial-gradient(720px circle at 72% 92%, rgba(255,170,150,0.20), transparent 62%);
+  }
+  /* Frosted surfaces */
+  .bg-surface-container-lowest, .bg-surface-container-low, .bg-surface-container,
+  .bg-surface-container-high, .bg-surface-container-highest, .bg-surface {
+    background-color: var(--glass-bg) !important;
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+  }
+  /* Translucent borders */
+  .border-surface-container-high, .border-surface-container, .border-outline-variant { border-color: var(--glass-brd) !important; }
+  /* Glassy sticky header */
+  header.sticky { background: rgba(255,248,246,0.60) !important; -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); }
+  /* Keep true white where it matters (product images, QR) */
+  .bg-white { background-color:#ffffff !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+
+  /* ===== Dark mode ===== */
+  html[data-theme="dark"] { --glass-bg: rgba(38,28,27,0.55); --glass-strong: rgba(48,36,34,0.72); --glass-brd: rgba(255,255,255,0.10); }
+  html[data-theme="dark"] body { background: linear-gradient(135deg,#1a1413 0%,#221917 50%,#1c1513 100%); }
+  html[data-theme="dark"] body::before {
+    background:
+      radial-gradient(620px circle at 10% 6%, rgba(184,67,58,0.20), transparent 60%),
+      radial-gradient(520px circle at 90% 16%, rgba(151,43,37,0.16), transparent 60%),
+      radial-gradient(720px circle at 72% 92%, rgba(120,40,34,0.22), transparent 62%);
+  }
+  html[data-theme="dark"] header.sticky { background: rgba(26,20,19,0.62) !important; }
+  html[data-theme="dark"] .text-on-surface, html[data-theme="dark"] .text-on-background { color:#f2e9e7 !important; }
+  html[data-theme="dark"] .text-secondary { color:#b4a8a5 !important; }
+  html[data-theme="dark"] .text-outline, html[data-theme="dark"] .text-outline-variant { color:#8f807d !important; }
+  html[data-theme="dark"] input, html[data-theme="dark"] textarea, html[data-theme="dark"] select { color:#f2e9e7; }
+  html[data-theme="dark"] ::placeholder { color:#9b8f8c !important; }
+  /* translucent white chips (bg-surface/90 etc) -> dark translucent */
+  html[data-theme="dark"] [class*="bg-surface/"] { background-color: rgba(38,28,27,0.85) !important; }
+  html[data-theme="dark"] [class*="bg-surface/"].text-on-surface { color:#f2e9e7 !important; }
+  /* keep red brand strong on dark */
+  html[data-theme="dark"] .text-primary { color:#e8655a !important; }
+
+  /* Selects / native controls */
+  select { color-scheme: light; }
+  html[data-theme="dark"] select, html[data-theme="dark"] input, html[data-theme="dark"] textarea { color-scheme: dark; color:#f2e9e7; }
+  html[data-theme="dark"] option { background-color:#241b19; color:#f2e9e7; }
+  /* Radios / checkboxes follow brand red */
+  input[type="radio"], input[type="checkbox"] { accent-color:#972b25; }
+  html[data-theme="dark"] input[type="radio"], html[data-theme="dark"] input[type="checkbox"] { accent-color:#e8655a; }
+  /* Payment / selectable option cards */
+  label.opt-card { background-color: var(--glass-bg); }
+  html[data-theme="dark"] label.opt-card { background-color: rgba(38,28,27,0.5); }
+
+  /* ===== Custom glass dropdown (replaces native select popup) ===== */
+  .gs-btn { display:inline-flex; align-items:center; gap:.4rem; justify-content:space-between; }
+  .gs-btn .gs-caret { font-size:18px; opacity:.6; margin-left:auto; transition:transform .15s; }
+  .gs-btn.gs-open .gs-caret { transform:rotate(180deg); }
+  .gs-panel {
+    background: var(--glass-strong); color:#1e1b1a;
+    backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%);
+    border:1px solid var(--glass-brd); border-radius:16px; padding:6px;
+    box-shadow:0 16px 48px rgba(60,20,16,0.22); z-index:9999; max-height:62vh; overflow:auto;
+  }
+  .gs-opt { display:flex; align-items:center; gap:8px; width:100%; text-align:left; padding:10px 12px; border-radius:10px; font-size:14px; color:inherit; background:transparent; cursor:pointer; white-space:nowrap; }
+  .gs-opt:hover { background:rgba(151,43,37,0.10); }
+  .gs-opt.gs-sel { color:#972b25; font-weight:600; }
+  .gs-check { font-size:18px; color:#972b25; }
+  .gs-check-sp { width:18px; display:inline-block; }
+  html[data-theme="dark"] .gs-panel { color:#f2e9e7; }
+  html[data-theme="dark"] .gs-opt:hover { background:rgba(232,101,90,0.16); }
+  html[data-theme="dark"] .gs-opt.gs-sel, html[data-theme="dark"] .gs-check { color:#e8655a; }
+
+  /* Frosted popovers (account menu, bell) — higher opacity so text is readable even if nested blur fails on iOS */
+  .frost-pop { background: rgba(255,248,246,0.92) !important; backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); box-shadow: 0 16px 48px rgba(60,20,16,0.20); }
+  html[data-theme="dark"] .frost-pop { background: rgba(32,24,22,0.93) !important; box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
+</style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">

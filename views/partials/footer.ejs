@@ -1,0 +1,45 @@
+<footer class="bg-surface-container-low border-t border-surface-container-high mt-auto py-12">
+  <div class="max-w-[1360px] mx-auto px-5 md:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-surface-container-high">
+      <div>
+        <div class="mb-3">
+          <span class="font-display font-semibold text-xl text-on-surface"><%= settings.site_name || 'Chợ Trời' %></span>
+        </div>
+        <p class="text-sm text-secondary leading-relaxed"><%= settings.intro %></p>
+        <% if (settings.hotline) { %><p class="text-sm text-on-surface mt-3 font-semibold">Hotline: <%= settings.hotline %></p><% } %>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-on-surface uppercase tracking-wider mb-3">Mua sắm</h4>
+        <ul class="text-sm text-secondary space-y-2">
+          <li><a class="hover:text-primary" href="/">Tất cả sản phẩm</a></li>
+          <li><a class="hover:text-primary" href="/?sort=best-seller">Bán chạy nhất</a></li>
+          <li><a class="hover:text-primary" href="/?sort=newest">Hàng mới về</a></li>
+          <li><a class="hover:text-primary" href="/cart">Giỏ hàng</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-on-surface uppercase tracking-wider mb-3">Hỗ trợ</h4>
+        <ul class="text-sm text-secondary space-y-2">
+          <li><a class="hover:text-primary" href="/about">Về chúng tôi</a></li>
+          <li><a class="hover:text-primary" href="/account">Tài khoản của tôi</a></li>
+          <li><span>Email: <%= settings.support_email %></span></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-on-surface uppercase tracking-wider mb-3">Đăng ký nhận tin</h4>
+        <p class="text-sm text-secondary mb-3">Nhận thông tin sản phẩm mới và ưu đãi từ Chợ Trời.</p>
+        <div class="flex gap-2">
+          <input class="bg-surface border border-outline-variant px-3 py-2 rounded-xl text-sm flex-1 outline-none text-on-surface focus:border-primary" placeholder="Email của bạn..." type="email">
+          <button class="bg-primary text-on-primary px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-container">Gửi</button>
+        </div>
+      </div>
+    </div>
+    <div class="pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-secondary gap-3">
+      <p>© 2025 <%= settings.site_name || 'Chợ Trời' %>. Tất cả các quyền được bảo lưu.</p>
+      <div class="flex items-center gap-4"><span>Visa / Mastercard</span><span>QR Pay 24/7</span><span>COD Toàn Quốc</span></div>
+    </div>
+  </div>
+</footer>
+<script src="/js/ui.js" defer></script>
+</body>
+</html>

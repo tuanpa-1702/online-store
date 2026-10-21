@@ -1,0 +1,15 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="flex-grow max-w-[900px] mx-auto px-5 md:px-8 py-10 w-full">
+  <div class="bg-surface-container-lowest rounded-3xl p-8 md:p-12 border border-surface-container-high shadow-sm">
+    <span class="text-xs text-primary uppercase tracking-widest font-bold">Về chúng tôi</span>
+    <h1 class="font-display text-3xl font-semibold text-on-surface mt-2 mb-6"><%= settings.site_name || 'Chợ Trời' %></h1>
+    <p class="text-base text-secondary leading-relaxed whitespace-pre-line"><%= settings.about %></p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+      <div class="bg-surface-container rounded-xl p-4"><span class="material-symbols-outlined text-primary">mail</span><p class="text-sm font-semibold mt-1">Email</p><p class="text-xs text-secondary"><%= settings.support_email %></p></div>
+      <div class="bg-surface-container rounded-xl p-4"><span class="material-symbols-outlined text-primary">call</span><p class="text-sm font-semibold mt-1">Hotline</p><p class="text-xs text-secondary"><%= settings.hotline %></p></div>
+      <div class="bg-surface-container rounded-xl p-4"><span class="material-symbols-outlined text-primary">verified</span><p class="text-sm font-semibold mt-1">Cam kết</p><p class="text-xs text-secondary">Chính hãng 100%</p></div>
+    </div>
+  </div>
+</main>
+<%- include('partials/footer') %>

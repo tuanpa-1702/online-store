@@ -1,0 +1,43 @@
+<%
+  const steps = STATUS_STEPS;
+  const curIdx = steps.indexOf(order.status);
+  const cancelled = order.status === 'cancelled';
+  const hist = (typeof history !== 'undefined' && history) ? history : [];
+%>
+<% if (cancelled) { %>
+  <div class="flex items-center gap-2 bg-red-50 text-red-700 rounded-xl px-4 py-3 text-sm font-semibold">
+    <span class="material-symbols-outlined text-[20px]">cancel</span> Đơn hàng đã bị hủy
+  </div>
+<% } else { %>
+  <div class="flex items-start justify-between relative">
+    <% steps.forEach((s, i) => { const done = i <= curIdx; %>
+      <div class="flex-1 flex flex-col items-center text-center relative z-10">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center <%= done ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-secondary' %>">
+          <span class="material-symbols-outlined text-[20px]"><%= STATUS_META[s].icon %></span>
+        </div>
+        <span class="text-[11px] mt-2 font-semibold <%= done ? 'text-on-surface' : 'text-secondary' %>"><%= STATUS_META[s].label %></span>
+      </div>
+      <% if (i < steps.length - 1) { %>
+        <div class="absolute top-5 h-0.5 <%= i < curIdx ? 'bg-primary' : 'bg-surface-container-high' %>" style="left: calc(<%= (i + 0.5) * (100 / steps.length) %>% ); width: <%= 100 / steps.length %>%;"></div>
+      <% } %>
+    <% }) %>
+  </div>
+<% } %>
+
+<% if (hist.length) { %>
+<div class="mt-6 border-t border-surface-container-high pt-4">
+  <p class="text-xs font-semibold text-secondary uppercase tracking-wider mb-3">Lịch sử đơn hàng</p>
+  <ul class="space-y-3">
+    <% hist.slice().reverse().forEach(h => { %>
+    <li class="flex items-start gap-3 text-sm">
+      <span class="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0"></span>
+      <div>
+        <span class="font-semibold text-on-surface"><%= (STATUS_META[h.status] && STATUS_META[h.status].label) || h.status %></span>
+        <% if (h.note) { %><span class="text-secondary"> — <%= h.note %></span><% } %>
+        <p class="text-xs text-secondary"><%= h.created_at %></p>
+      </div>
+    </li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>

@@ -1,0 +1,12 @@
+node_modules/
+data/*.db
+data/*.db-*
+!data/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
+
+.env*
+!.env.example
+
+*.log
+tmp/

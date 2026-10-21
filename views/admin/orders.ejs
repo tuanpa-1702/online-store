@@ -1,0 +1,32 @@
+<%- include('../partials/admin-layout-top') %>
+<div class="flex items-center gap-2 mb-5 overflow-x-auto">
+  <% const filters = [['','Tất cả'],['pending','Chờ xác nhận'],['confirmed','Đã xác nhận'],['shipping','Đang giao'],['completed','Hoàn thành'],['cancelled','Đã hủy']]; %>
+  <% filters.forEach(f => { %>
+    <a href="/admin/orders<%= f[0] ? '?status=' + f[0] : '' %>" class="px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 <%= status === f[0] ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-secondary hover:bg-surface-container' %>"><%= f[1] %></a>
+  <% }) %>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-surface-container text-secondary text-xs uppercase">
+        <tr><th class="text-left px-5 py-3">Mã đơn</th><th class="text-left px-5 py-3">Khách hàng</th><th class="text-left px-5 py-3">SĐT</th><th class="text-left px-5 py-3">Tổng</th><th class="text-left px-5 py-3">Thanh toán</th><th class="text-left px-5 py-3">Trạng thái</th><th class="text-left px-5 py-3">Ngày</th><th class="px-5 py-3"></th></tr>
+      </thead>
+      <tbody>
+        <% if (orders.length === 0) { %><tr><td colspan="8" class="px-5 py-8 text-center text-secondary">Không có đơn hàng.</td></tr><% } %>
+        <% orders.forEach(o => { %>
+        <tr class="border-t border-surface-container-high">
+          <td class="px-5 py-3 font-semibold">#<%= o.code %></td>
+          <td class="px-5 py-3"><%= o.customer_name %></td>
+          <td class="px-5 py-3 text-secondary"><%= o.phone %></td>
+          <td class="px-5 py-3 font-semibold text-primary"><%= fmt(o.total) %></td>
+          <td class="px-5 py-3 text-secondary"><%= o.payment_method === 'bank' ? 'CK' : 'COD' %></td>
+          <td class="px-5 py-3"><%- include('../partials/status', { status: o.status }) %></td>
+          <td class="px-5 py-3 text-secondary text-xs"><%= o.created_at %></td>
+          <td class="px-5 py-3 text-right"><a href="/admin/orders/<%= o.id %>" class="text-primary text-xs font-semibold">Xử lý</a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/admin-layout-bottom') %>

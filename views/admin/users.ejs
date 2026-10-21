@@ -1,0 +1,64 @@
+<%- include('../partials/admin-layout-top') %>
+<% if (error) { %><div class="bg-red-50 text-primary px-4 py-3 rounded-xl text-sm mb-5 border border-outline-variant"><%= error %></div><% } %>
+<% if (ok) { %><div class="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-sm mb-5 border border-emerald-200">Đã tạo người dùng thành công.</div><% } %>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+  <!-- Create user -->
+  <div class="lg:col-span-1 bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm p-5">
+    <h2 class="font-bold mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">person_add</span> Tạo người dùng</h2>
+    <form action="/admin/users/new" method="post" class="space-y-3">
+      <div><label class="text-xs font-semibold text-secondary">Họ tên</label><input name="name" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      <div><label class="text-xs font-semibold text-secondary">Email *</label><input name="email" type="email" required class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      <div><label class="text-xs font-semibold text-secondary">Mật khẩu * (≥6 ký tự)</label><input name="password" type="text" required class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"></div>
+      <div>
+        <label class="text-xs font-semibold text-secondary">Vai trò</label>
+        <select name="role" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          <option value="customer">Khách hàng</option>
+          <option value="staff">Nhân viên (sửa sản phẩm + đơn hàng)</option>
+          <option value="admin">Quản trị viên (toàn quyền)</option>
+        </select>
+      </div>
+      <button class="w-full py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container">Tạo người dùng</button>
+    </form>
+    <div class="mt-4 pt-4 border-t border-surface-container-high text-xs text-secondary space-y-1">
+      <p><strong class="text-on-surface">Nhân viên</strong> chỉ: sửa chi tiết sản phẩm, xem & cập nhật tiến độ đơn hàng, dùng thư viện ảnh.</p>
+      <p><strong class="text-on-surface">Quản trị viên</strong>: toàn quyền (cấu hình, người dùng, tạo/xóa sản phẩm).</p>
+    </div>
+  </div>
+
+  <!-- User list -->
+  <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-surface-container text-secondary text-xs uppercase">
+          <tr><th class="text-left px-5 py-3">Tên</th><th class="text-left px-5 py-3">Email</th><th class="text-left px-5 py-3">Đăng nhập</th><th class="text-left px-5 py-3">Vai trò</th><th class="px-5 py-3"></th></tr>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+          <tr class="border-t border-surface-container-high">
+            <td class="px-5 py-3 font-semibold"><%= u.name %></td>
+            <td class="px-5 py-3 text-secondary"><%= u.email %></td>
+            <td class="px-5 py-3 text-secondary text-xs"><%= u.google_id ? 'Google' : 'Email' %></td>
+            <td class="px-5 py-3">
+              <% const r = u.role || (u.is_admin ? 'admin' : 'customer'); %>
+              <% const rl = { admin: ['Quản trị','text-primary'], staff: ['Nhân viên','text-blue-700'], customer: ['Khách hàng','text-secondary'] }[r]; %>
+              <span class="text-xs font-semibold <%= rl[1] %>"><%= rl[0] %></span>
+            </td>
+            <td class="px-5 py-3">
+              <form action="/admin/users/<%= u.id %>/role" method="post" class="flex items-center gap-2 justify-end">
+                <select name="role" class="px-2 py-1.5 rounded-lg border border-outline-variant bg-surface outline-none text-xs">
+                  <% ['customer','staff','admin'].forEach(opt => { %>
+                    <option value="<%= opt %>" <%= r === opt ? 'selected' : '' %>><%= opt === 'admin' ? 'Quản trị' : (opt === 'staff' ? 'Nhân viên' : 'Khách hàng') %></option>
+                  <% }) %>
+                </select>
+                <button class="text-xs font-semibold text-primary hover:underline">Lưu</button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-layout-bottom') %>

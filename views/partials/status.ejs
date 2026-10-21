@@ -1,0 +1,11 @@
+<%
+  const statusMap = {
+    pending: ['Chờ xác nhận', 'bg-amber-50 text-amber-700'],
+    confirmed: ['Đã xác nhận', 'bg-blue-50 text-blue-700'],
+    shipping: ['Đang giao', 'bg-indigo-50 text-indigo-700'],
+    completed: ['Hoàn thành', 'bg-emerald-50 text-emerald-700'],
+    cancelled: ['Đã hủy', 'bg-red-50 text-red-700'],
+  };
+  const st = statusMap[status] || statusMap.pending;
+%>
+<span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold <%= st[1] %>"><%= st[0] %></span>

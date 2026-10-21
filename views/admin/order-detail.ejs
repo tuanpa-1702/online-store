@@ -1,0 +1,82 @@
+<%- include('../partials/admin-layout-top') %>
+<a href="/admin/orders" class="text-sm text-secondary hover:text-on-surface flex items-center gap-1 mb-4"><span class="material-symbols-outlined text-[18px]">arrow_back</span> Danh sách đơn hàng</a>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+  <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm">
+    <div class="flex items-center justify-between gap-2 mb-5 flex-wrap">
+      <h2 class="font-bold text-lg">Đơn #<%= order.code %></h2>
+      <div class="flex items-center gap-2">
+        <%- include('../partials/payment-badge', { order }) %>
+        <%- include('../partials/status', { status: order.status }) %>
+      </div>
+    </div>
+    <div class="mb-6 pb-6 border-b border-surface-container-high">
+      <%- include('../partials/order-timeline', { order, history }) %>
+    </div>
+    <div class="flex flex-col gap-3">
+      <% items.forEach(it => { %>
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low shrink-0"><img src="<%= it.image %>" class="w-full h-full object-cover"></div>
+        <p class="text-sm flex-1"><%= it.name %> <span class="text-secondary">× <%= it.qty %></span></p>
+        <p class="text-sm font-semibold"><%= fmt(it.price * it.qty) %></p>
+      </div>
+      <% }) %>
+    </div>
+    <div class="border-t border-surface-container-high mt-4 pt-4 space-y-2 text-sm">
+      <div class="flex justify-between"><span class="text-secondary">Tạm tính</span><span><%= fmt(order.subtotal) %></span></div>
+      <div class="flex justify-between"><span class="text-secondary">Vận chuyển</span><span><%= order.shipping === 0 ? 'Miễn phí' : fmt(order.shipping) %></span></div>
+      <div class="flex justify-between font-bold text-base"><span>Tổng cộng</span><span class="text-primary"><%= fmt(order.total) %></span></div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm">
+      <h3 class="font-bold mb-3">Thông tin khách hàng</h3>
+      <div class="text-sm text-secondary space-y-1.5">
+        <p><strong class="text-on-surface"><%= order.customer_name %></strong></p>
+        <p><%= order.phone %></p>
+        <% if (order.email) { %><p><%= order.email %></p><% } %>
+        <p><%= order.address %></p>
+        <p>Thanh toán: <%= order.payment_method === 'bank' ? 'Chuyển khoản' : 'COD' %></p>
+        <% if (order.note) { %><p class="pt-2 border-t border-surface-container-high">Ghi chú: <%= order.note %></p><% } %>
+      </div>
+    </div>
+
+    <% if (order.payment_method === 'bank') { %>
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border <%= order.payment_status === 'reported' ? 'border-primary' : 'border-surface-container-high' %> shadow-sm">
+      <h3 class="font-bold mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[20px]">account_balance</span> Thanh toán chuyển khoản</h3>
+      <p class="text-sm text-secondary mb-3">
+        Trạng thái: <%- include('../partials/payment-badge', { order }) %><br>
+        Nội dung CK cần có: <strong class="text-on-surface"><%= order.code %></strong> · Số tiền: <strong class="text-on-surface"><%= fmt(order.total) %></strong>
+      </p>
+      <% if (order.payment_status === 'reported') { %>
+        <p class="text-xs text-blue-700 bg-blue-50 rounded-lg px-3 py-2 mb-3">Khách đã báo chuyển khoản. Hãy mở app ngân hàng kiểm tra có giao dịch đúng số tiền & nội dung <strong><%= order.code %></strong> rồi xác nhận.</p>
+      <% } %>
+      <% if (order.payment_status !== 'paid') { %>
+        <form action="/admin/orders/<%= order.id %>/payment" method="post">
+          <input type="hidden" name="payment_status" value="paid">
+          <button class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-700 flex items-center justify-center gap-2"><span class="material-symbols-outlined text-[20px]">verified</span> Xác nhận đã nhận tiền</button>
+        </form>
+      <% } else { %>
+        <div class="flex items-center gap-2 text-emerald-700 text-sm font-semibold mb-2"><span class="material-symbols-outlined text-[20px]">verified</span> Đã xác nhận nhận tiền</div>
+        <form action="/admin/orders/<%= order.id %>/payment" method="post">
+          <input type="hidden" name="payment_status" value="unpaid">
+          <button class="text-xs text-secondary hover:text-primary underline">Hoàn tác (chưa nhận tiền)</button>
+        </form>
+      <% } %>
+    </div>
+    <% } %>
+
+    <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm">
+      <h3 class="font-bold mb-3">Cập nhật trạng thái</h3>
+      <form action="/admin/orders/<%= order.id %>/status" method="post" class="flex flex-col gap-3">
+        <select name="status" class="px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          <% const sts = [['pending','Chờ xác nhận'],['confirmed','Đã xác nhận'],['shipping','Đang giao'],['completed','Hoàn thành'],['cancelled','Đã hủy']]; %>
+          <% sts.forEach(s => { %><option value="<%= s[0] %>" <%= order.status === s[0] ? 'selected' : '' %>><%= s[1] %></option><% }) %>
+        </select>
+        <input name="note" placeholder="Ghi chú (tùy chọn, vd: đã gọi khách)" class="px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+        <button class="py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container">Cập nhật tiến độ</button>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin-layout-bottom') %>

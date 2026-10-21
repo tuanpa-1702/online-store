@@ -1,0 +1,143 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<main class="flex-grow max-w-[1360px] mx-auto px-5 md:px-8 py-8 w-full">
+  <h1 class="font-display text-2xl font-semibold text-on-surface mb-6">Thanh toán</h1>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="bg-red-50 text-primary px-4 py-3 rounded-xl text-sm mb-5 border border-outline-variant"><%= error %></div>
+  <% } %>
+  <form action="/checkout" method="post" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-7 flex flex-col gap-6">
+      <!-- Shipping info -->
+      <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm">
+        <h2 class="font-bold text-on-surface mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">local_shipping</span> Thông tin giao hàng</h2>
+        <% const f = typeof form !== 'undefined' ? form : {}; %>
+        <% const addrs = (typeof addresses !== 'undefined' && addresses) ? addresses : []; %>
+        <% const submitted = typeof form !== 'undefined'; %>
+        <% const def = addrs.find(a => a.is_default) || addrs[0] || null; %>
+        <% const pre = submitted ? {} : (def || {}); %>
+
+        <% if (addrs.length) { %>
+        <div class="mb-5 bg-surface-container-low rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-semibold text-secondary">Địa chỉ đã lưu</label>
+            <a href="/account#addresses" class="text-xs font-semibold text-primary hover:underline">Quản lý / chỉnh sửa</a>
+          </div>
+          <select id="addrSelect" onchange="fillAddr(this)" class="w-full px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+            <% addrs.forEach(a => { %>
+            <option value="<%= a.id %>"
+              data-name="<%= a.recipient_name %>" data-phone="<%= a.phone %>" data-address="<%= a.address %>" data-note="<%= a.note %>"
+              <%= (def && def.id === a.id && !submitted) ? 'selected' : '' %>>
+              <%= a.recipient_name %> · <%= a.phone %> — <%= a.address %><%= a.is_default ? ' (mặc định)' : '' %>
+            </option>
+            <% }) %>
+            <option value="" <%= submitted ? 'selected' : '' %>>➕ Nhập địa chỉ mới…</option>
+          </select>
+        </div>
+        <% } %>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="text-xs font-semibold text-secondary">Họ và tên *</label>
+            <input name="customer_name" required value="<%= f.customer_name || pre.recipient_name || (user && user.name) || '' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-secondary">Số điện thoại *</label>
+            <input name="phone" required value="<%= f.phone || pre.phone || '' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-secondary">Email</label>
+            <input name="email" type="email" value="<%= f.email || (user && user.email) || '' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-xs font-semibold text-secondary">Địa chỉ nhận hàng *</label>
+            <input name="address" required value="<%= f.address || pre.address || '' %>" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-xs font-semibold text-secondary">Ghi chú (vd: công ty, chỉ giao giờ hành chính)</label>
+            <textarea name="note" rows="2" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-outline-variant bg-surface outline-none focus:border-primary text-sm"><%= f.note || pre.note || '' %></textarea>
+          </div>
+          <% if (user) { %>
+          <div class="sm:col-span-2">
+            <label class="flex items-center gap-2 text-sm text-secondary"><input type="checkbox" name="save_address" value="1" class="accent-[#972b25]"> Lưu địa chỉ này vào sổ địa chỉ</label>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Payment method -->
+      <div class="bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm">
+        <h2 class="font-bold text-on-surface mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">payments</span> Phương thức thanh toán</h2>
+        <div class="space-y-3">
+          <label class="opt-card flex items-center gap-3 p-4 rounded-xl border border-outline-variant cursor-pointer has-[:checked]:border-primary has-[:checked]:ring-1 has-[:checked]:ring-primary">
+            <input type="radio" name="payment_method" value="cod" checked>
+            <div><p class="font-semibold text-sm text-on-surface">Thanh toán khi nhận hàng (COD)</p><p class="text-xs text-secondary">Trả tiền mặt khi nhận sản phẩm.</p></div>
+          </label>
+          <label class="opt-card flex items-start gap-3 p-4 rounded-xl border border-outline-variant cursor-pointer has-[:checked]:border-primary has-[:checked]:ring-1 has-[:checked]:ring-primary">
+            <input type="radio" name="payment_method" value="bank" class="accent-[#972b25] mt-1" onchange="document.getElementById('qrBox').classList.toggle('hidden', !this.checked)">
+            <div class="flex-1">
+              <p class="font-semibold text-sm text-on-surface">Chuyển khoản / Quét mã QR</p>
+              <p class="text-xs text-secondary">Chuyển khoản trước qua ngân hàng hoặc QR.</p>
+              <div id="qrBox" class="hidden mt-3 flex flex-col sm:flex-row gap-5 items-start">
+                <%- include('partials/qr-pay', { amount: total, addInfo: '' }) %>
+                <div class="text-xs text-secondary space-y-1">
+                  <p><strong class="text-on-surface">Ngân hàng:</strong> <%= settings.bank_name %></p>
+                  <p><strong class="text-on-surface">Số TK:</strong> <%= settings.bank_account %></p>
+                  <p><strong class="text-on-surface">Chủ TK:</strong> <%= settings.bank_holder %></p>
+                  <p class="text-primary mt-1">Mã QR đã gồm số tiền. Nội dung CK = <strong>mã đơn hàng</strong> (hiện sau khi đặt).</p>
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="lg:col-span-5 bg-surface-container-lowest rounded-2xl p-6 border border-surface-container-high shadow-sm sticky top-24">
+      <h2 class="font-bold text-on-surface mb-4">Đơn hàng của bạn</h2>
+      <div class="flex flex-col gap-3 max-h-72 overflow-y-auto mb-4">
+        <% cart.items.forEach(it => { %>
+        <div class="flex items-center gap-3">
+          <div class="w-14 h-14 rounded-lg overflow-hidden bg-surface-container-low shrink-0 relative">
+            <img src="<%= it.image %>" class="w-full h-full object-cover">
+            <span class="absolute -top-1 -right-1 bg-primary text-on-primary text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center"><%= it.qty %></span>
+          </div>
+          <p class="text-sm flex-1 line-clamp-2"><%= it.name %></p>
+          <p class="text-sm font-semibold"><%= fmt(it.lineTotal) %></p>
+        </div>
+        <% }) %>
+      </div>
+      <div class="space-y-2 text-sm border-t border-surface-container-high pt-4">
+        <div class="flex justify-between"><span class="text-secondary">Tạm tính</span><span class="font-semibold"><%= fmt(cart.subtotal) %></span></div>
+        <div class="flex justify-between"><span class="text-secondary">Vận chuyển</span><span class="font-semibold"><%= shipping === 0 ? 'Miễn phí' : fmt(shipping) %></span></div>
+        <div class="flex justify-between items-center border-t border-surface-container-high pt-3"><span class="font-bold">Tổng cộng</span><span class="text-xl font-extrabold text-primary"><%= fmt(total) %></span></div>
+      </div>
+      <button type="submit" class="w-full mt-6 py-3.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary-container transition">Đặt hàng</button>
+      <a href="/cart" class="block text-center mt-2 py-2 text-sm text-secondary hover:text-on-surface">Quay lại giỏ hàng</a>
+    </div>
+  </form>
+</main>
+<script>
+  function fillAddr(sel) {
+    var opt = sel.options[sel.selectedIndex];
+    var form = sel.closest('form');
+    var name = form.querySelector('[name=customer_name]');
+    var phone = form.querySelector('[name=phone]');
+    var address = form.querySelector('[name=address]');
+    var note = form.querySelector('[name=note]');
+    var saveBox = form.querySelector('[name=save_address]');
+    if (!opt.value) {
+      // "Nhập địa chỉ mới" -> clear fields
+      name.value = ''; phone.value = ''; address.value = ''; note.value = '';
+      if (saveBox) saveBox.checked = true;
+      name.focus();
+      return;
+    }
+    name.value = opt.dataset.name || '';
+    phone.value = opt.dataset.phone || '';
+    address.value = opt.dataset.address || '';
+    note.value = opt.dataset.note || '';
+    if (saveBox) saveBox.checked = false;
+  }
+</script>
+<%- include('partials/footer') %>

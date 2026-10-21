@@ -1,0 +1,40 @@
+<%- include('../partials/admin-layout-top') %>
+<div class="flex items-center justify-between mb-5">
+  <p class="text-secondary text-sm"><%= products.length %> sản phẩm</p>
+  <a href="/admin/products/new" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container"><span class="material-symbols-outlined text-[18px]">add</span> Thêm sản phẩm</a>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-surface-container text-secondary text-xs uppercase">
+        <tr><th class="text-left px-5 py-3">Sản phẩm</th><th class="text-left px-5 py-3">Danh mục</th><th class="text-left px-5 py-3">Giá</th><th class="text-left px-5 py-3">Kho</th><th class="text-left px-5 py-3">Đã bán</th><th class="text-left px-5 py-3">Trạng thái</th><th class="px-5 py-3"></th></tr>
+      </thead>
+      <tbody>
+        <% products.forEach(p => { %>
+        <tr class="border-t border-surface-container-high">
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container-low shrink-0"><img src="<%= p.image %>" class="w-full h-full object-cover"></div>
+              <span class="font-semibold line-clamp-1 max-w-[220px]"><%= p.name %></span>
+            </div>
+          </td>
+          <td class="px-5 py-3 text-secondary"><%= p.category %></td>
+          <td class="px-5 py-3 font-semibold text-primary"><%= fmt(p.price) %></td>
+          <td class="px-5 py-3"><%= p.stock %></td>
+          <td class="px-5 py-3"><%= p.sold %></td>
+          <td class="px-5 py-3"><% if (p.active) { %><span class="text-emerald-600 text-xs font-semibold">Đang bán</span><% } else { %><span class="text-secondary text-xs">Ẩn</span><% } %></td>
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-2 justify-end">
+              <a href="/admin/products/<%= p.id %>/edit" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-secondary"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+              <form action="/admin/products/<%= p.id %>/delete" method="post" onsubmit="return confirm('Xóa sản phẩm này?')">
+                <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-primary"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../partials/admin-layout-bottom') %>

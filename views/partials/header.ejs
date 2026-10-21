@@ -1,0 +1,82 @@
+<% if (settings.announcement && settings.announcement.trim()) { %>
+<div class="bg-inverse-surface text-inverse-on-surface py-2 px-4 text-center text-[11px] tracking-widest font-medium">
+  <%= settings.announcement %>
+</div>
+<% } %>
+<header class="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-surface-container-high">
+  <div class="max-w-[1360px] mx-auto px-5 md:px-8 h-20 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-8">
+      <a href="/" class="flex items-center group">
+        <span class="font-display font-semibold text-2xl text-on-surface">
+          <%= settings.site_name || 'Chợ Trời' %>
+        </span>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm font-semibold">
+        <a href="/" class="<%= currentPath === '/' ? 'text-primary' : 'text-secondary hover:text-on-surface' %> transition-colors">Trang chủ</a>
+        <a href="/?sort=newest" class="text-secondary hover:text-on-surface transition-colors">Sản phẩm mới</a>
+        <a href="/?sort=best-seller" class="text-secondary hover:text-on-surface transition-colors">Bán chạy</a>
+        <a href="/about" class="<%= currentPath === '/about' ? 'text-primary' : 'text-secondary hover:text-on-surface' %> transition-colors">Về chúng tôi</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-2">
+      <form action="/" method="get" class="hidden lg:flex items-center bg-surface-container-low border border-outline-variant rounded-full px-4 py-2 w-64">
+        <span class="material-symbols-outlined text-[18px] mr-2 text-outline">search</span>
+        <input name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" class="bg-transparent border-0 outline-none w-full text-on-surface placeholder:text-outline text-sm" placeholder="Tìm sản phẩm..." type="text">
+      </form>
+      <button type="button" id="themeToggle" onclick="toggleTheme()" aria-label="Chế độ tối" class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface hover:opacity-70 transition-opacity">
+        <span class="material-symbols-outlined text-[22px]" id="themeIcon">dark_mode</span>
+      </button>
+      <a href="/cart" class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high text-on-surface transition-colors" aria-label="Giỏ hàng">
+        <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+        <% if (cartCount > 0) { %>
+        <span class="absolute top-1.5 right-1.5 bg-primary text-on-primary text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center"><%= cartCount %></span>
+        <% } %>
+      </a>
+      <% if (currentUser) { %>
+        <details class="relative account-menu">
+          <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer flex items-center pl-1">
+            <% if (currentUser.avatar) { %>
+              <img src="<%= currentUser.avatar %>" class="w-9 h-9 rounded-full object-cover border border-outline-variant" alt="avatar">
+            <% } else { %>
+              <span class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center text-sm font-bold"><%= (currentUser.name || 'U').charAt(0).toUpperCase() %></span>
+            <% } %>
+          </summary>
+          <div class="frost-pop absolute right-0 top-12 w-56 bg-surface-container-lowest rounded-xl shadow-lg border border-surface-container-high py-2 z-50">
+            <div class="px-4 py-2 border-b border-surface-container-high">
+              <p class="text-sm font-semibold truncate"><%= currentUser.name %></p>
+              <p class="text-xs text-secondary truncate"><%= currentUser.email %></p>
+            </div>
+            <a href="/account" class="block px-4 py-2.5 text-sm hover:bg-surface-container">Trang cá nhân</a>
+            <% if (currentUser.is_admin) { %>
+              <a href="/admin" class="block px-4 py-2.5 text-sm hover:bg-surface-container text-primary font-semibold">Trang quản trị</a>
+            <% } %>
+            <a href="/logout" class="block px-4 py-2.5 text-sm hover:bg-surface-container text-primary">Đăng xuất</a>
+          </div>
+        </details>
+      <% } else { %>
+        <a href="/login" class="inline-flex items-center px-4 sm:px-5 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container transition-colors">
+          Đăng nhập
+        </a>
+      <% } %>
+    </div>
+  </div>
+</header>
+<script>
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('details.account-menu[open]').forEach(function (d) {
+      if (!d.contains(e.target)) d.removeAttribute('open');
+    });
+  });
+  function applyThemeIcon() {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var el = document.getElementById('themeIcon');
+    if (el) el.innerText = dark ? 'light_mode' : 'dark_mode';
+  }
+  function toggleTheme() {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (dark) { document.documentElement.removeAttribute('data-theme'); try { localStorage.setItem('theme', 'light'); } catch (e) {} }
+    else { document.documentElement.setAttribute('data-theme', 'dark'); try { localStorage.setItem('theme', 'dark'); } catch (e) {} }
+    applyThemeIcon();
+  }
+  applyThemeIcon();
+</script>
