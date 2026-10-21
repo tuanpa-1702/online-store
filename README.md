@@ -27,7 +27,6 @@ pm2 save                             # lưu danh sách process
   người dùng (cấp/bỏ quyền admin), cấu hình (tên web, banner, QR thanh toán, thông tin
   ngân hàng, giới thiệu, phí vận chuyển...).
 
-## Bước cần làm để chạy public tại https://chotroi.tuanpa.tech
 
 ### 1. Cấu hình nginx reverse proxy (cần sudo)
 ```bash
