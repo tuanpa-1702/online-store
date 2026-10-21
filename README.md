@@ -27,23 +27,24 @@ pm2 save                             # lưu danh sách process
   người dùng (cấp/bỏ quyền admin), cấu hình (tên web, banner, QR thanh toán, thông tin
   ngân hàng, giới thiệu, phí vận chuyển...).
 
+## Bước cần làm để chạy public tại https://your-domain.com
 
 ### 1. Cấu hình nginx reverse proxy (cần sudo)
 ```bash
-sudo cp /var/www/store/nginx-chotroi.conf /etc/nginx/sites-available/chotroi.tuanpa.tech
-sudo ln -s /etc/nginx/sites-available/chotroi.tuanpa.tech /etc/nginx/sites-enabled/
+sudo cp nginx.conf.example /etc/nginx/sites-available/your-domain.com
+sudo ln -s /etc/nginx/sites-available/your-domain.com /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ### 2. Cài SSL (HTTPS) bằng certbot
 ```bash
-sudo certbot --nginx -d chotroi.tuanpa.tech
+sudo certbot --nginx -d your-domain.com
 ```
 
 ### 3. Cấu hình Google OAuth
 Vào Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client, thêm:
-- **Authorized JavaScript origins:** `https://chotroi.tuanpa.tech`
-- **Authorized redirect URIs:** `https://chotroi.tuanpa.tech/auth/google/callback`
+- **Authorized JavaScript origins:** `https://your-domain.com`
+- **Authorized redirect URIs:** `https://your-domain.com/auth/google/callback`
 
 (Client ID và Secret đã được đặt sẵn trong file `.env`.)
 
